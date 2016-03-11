@@ -26,6 +26,7 @@
 # $FASTA: sequences (fasta file)
 # $LVL: clustering level (integer) 3 = 8 clusters, 4 = 16 clusters ... 
 # $OUT: Directory to output the clusters
+# $PROGRAM: blastx or blastn
 # $WHITE_TAB: Output file of the blast on the white list (.tsv file)
 # $BLACK_TAB: Output file of the blast on the black list (.tsv file)
 # $WHITE_DB: (optionnal) name of the white list blast DB
@@ -62,8 +63,12 @@ then
 
 
 	## blast on both datases
-	blastx -db $WHITE_DB -query $FASTA -out $OUT/$WHITE_TAB -outfmt 6 -max_target_seqs 1 -num_threads 24 -evalue 1e-10
-	blastx -db $BLACK_DB -query $FASTA -out $OUT/$BLACK_TAB -outfmt 6 -max_target_seqs 1 -num_threads 24 -evalue 1e-10
+	$PROGRAM -db $WHITE_DB -query $FASTA -out $OUT/$WHITE_TAB -outfmt 6 -max_target_seqs 1 -num_threads 24 -evalue 1e-10
+	$PROGRAM -db $BLACK_DB -query $FASTA -out $OUT/$BLACK_TAB -outfmt 6 -max_target_seqs 1 -num_threads 24 -evalue 1e-10
+	
+	eval "$a"
+	eval "$b"
+
 	## sort to get the best alignment
 	sort -nk12,12 $OUT/$WHITE_TAB >$DIR/temp1
 	sort -nk12,12 $OUT/$BLACK_TAB >$DIR/temp2

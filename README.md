@@ -6,8 +6,10 @@ This is a pipeline for decontamination of biological sequences
 you can use it as a pipeline with the MCSC_decontamination.sh script
 or you can use only part of the pipeline (see below)
 
+
 Author: Joel Lafond Lapalme
 email for questions/support: joel.lafond.lapalme@gmail.com
+
 
 For more information on the method, see the paper at
 LINK
@@ -34,7 +36,7 @@ LINK
 
 ## hints and tips
 
- If you work with large databases the BLAST command will be long.
+ If you work with large databases the BLAST command will be time consuming.
  You should consider make the blastx/blastn on a parrallel computer.
 
  Your white list should be a union of sequences from known organisms 
@@ -45,7 +47,7 @@ LINK
  that are close the contaminants from your sample. If you have no idea
  which contaminants are in your sample, you should BLAST all (or sub-sample)
  your data on the NR databases of NCBI. By computing the species distribution
- of your best BLAST hit, you should have an idea of which type of organism
+ of your best BLAST hit, you should have an idea of which type of organisms
  are in your sample.
 
 
