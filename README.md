@@ -95,8 +95,12 @@ sh MCSC_decontamination.sh test/test.ini
 
 
 ### Time and performance
-The longuest part of the method is the DIAMOND blast of the fasta file.
+The longest part of the method is the DIAMOND blast of the fasta file.
 If you already have a DIAMOND blast of this file, just insert the file.daa
 in the output directory. The pipeline will skip the blastx and use the file.daa
 as DIAMONd blast output.
 
+Also if you misspelled the target taxon ($WHITE) you can run only the WR index calculation by changing your .ini file and call
+```
+sh MCSC_Decontamination file.ini --recalculate
+```
