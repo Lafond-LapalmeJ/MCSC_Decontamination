@@ -49,7 +49,7 @@ cat uniref100.taxlist.gz.part-a* | gunzip > uniref100.taxlist
 4) Get and build uniref90 database with DIAMOND
 ```
 wget ftp://ftp.uniprot.org/pub/databases/uniprot/uniref/uniref90/uniref90.fasta.gz | gunzip
-diamond makedb --in uniref90.fasta
+diamond makedb --in uniref90.fasta --db uniref90
 ```
 5) Download the ncbi taxonomy dmp
 ```
