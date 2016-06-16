@@ -1,0 +1,1 @@
+ftp://ftp.ncbi.nih.gov/pub/taxonomy/

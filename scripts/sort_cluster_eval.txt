@@ -1,0 +1,1 @@
+ awk '{ print length($1), $0 | "sort -n" }' cluster_eval.tsv | cut -d' ' -f2 > cluster_eval2.tsv
