@@ -30,6 +30,9 @@ UNIREF90=""
 # $UNIREF100: path to the UNIREF100 taxonomy list (REQUIRED)
 UNIREF100=""
 
+# $TAXDUMP: path to the NCBI taxonomy dump (REQUIRED)
+TAXDUMP=""
+
 # $MCSC: path to the MCSC_Decontamination folder (REQUIRED)
 MCSC=""
 
@@ -74,7 +77,7 @@ then
 	
 	## Format the DIAMOND output 
 	perl $MCSC/scripts/get_taxa_from_diamond.pl $OUT/$NAME.daa.tagc \
-	$MCSC/data/names.dmp $MCSC/data/nodes.dmp > $OUT/temp.txt
+	$TAXDUMP/names.dmp $TAXDUMP/nodes.dmp > $OUT/temp.txt
 	sort -rk3,3 $OUT/temp.txt | sort -uk1,1 > $OUT/taxo_uniq.txt  
 	sed "s/'\"//g" $OUT/taxo_uniq.txt > $OUT/temp.txt
 	mv $OUT/temp.txt $OUT/taxo_uniq.txt
