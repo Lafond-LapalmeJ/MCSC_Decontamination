@@ -51,7 +51,11 @@ cat uniref100.taxlist.gz.part-a* | gunzip > uniref100.taxlist
 wget ftp://ftp.uniprot.org/pub/databases/uniprot/uniref/uniref90/uniref90.fasta.gz | gunzip
 diamond makedb --in uniref90.fasta
 ```
-
+5) Download the ncbi taxonomy dmp in data directory
+```
+cd data
+wget ftp://ftp.ncbi.nlm.nih.gov/pub/taxonomy/taxdump.tar.gz | tar -xvf
+```
 
 
 
