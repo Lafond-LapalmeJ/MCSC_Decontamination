@@ -53,16 +53,54 @@ source $OUT/param_file.txt
 
 rm param_file.txt
 
+
+
+
 ## skip if you only need to run cluster evaluation with a different taxon
 if [ $# -eq 1 ]
 then
 
 	mkdir -p "$OUT"	
 
+	#convert fastq to fasta if detected
+	#check if input file is valid
+	if [ -n $(echo "$FASTA" | grep -F ".fastq") ]; then #is input fastq file? Check file extension fisrt.
+		if [ "${FASTA##*.}" == "gz" ]; then #is it gzipped?
+		    	LINE1="$(zcat "$FASTA" | head -n 1)" #assuming the first line is a sequence header
+		    	CHAR1="${"$LINE1":1:1}"
+		      	if [ "$CHAR1" == "@" ]; then
+				zcat "$FASTA" | awk '{if(NR%4==1) {printf(">%s\n",substr($0,2));} else if(NR%4==2) print;}' \
+					> $MCMC/data/file.fa
+		        	FASTA=$MCMC/data/file.fa
+		        else
+		        	echo "Invalid fastq file."
+		        	exit 1
+		        fi
+		else
+			LINE1=$(cat "$FASTA" | head -n 1)
+			CHAR1=${$LINE1:1:1}
+			if [ "$CHAR1"0 == "@" ]; then
+				cat "$FASTA" | awk '{if(NR%4==1) {printf(">%s\n",substr($0,2));} else if(NR%4==2) print;}' \
+					> $MCMC/data/file.fa
+				FASTA="${MCMC}"/data/file.fa
+			else
+		        	echo "Invalid fastq file."
+		        	exit 1
+		        fi
+		fi
+	else #it's a fasta
+		LINE1=$(cat "$FASTA" | head -n 1)
+		CHAR1=${$LINE1:1:1}
+		if [ "$CHAR1" != ">" ]; then
+			echo "Invalid fasta file."
+		        exit 1
+		fi
+	fi
+
 	## get the fasta name
 	FILE=$(basename "$FASTA")
 	NAME="${FILE%.*}"
-
+	
 	## DIAMOND blast
 	if ! [ -e $OUT/$NAME.daa ]
 	then
