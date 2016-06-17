@@ -12,11 +12,11 @@ Submited to Bioinformatics
 
 ### Included ###
  
- ./MCSC_decontamination.sh             # script for pipeline
- ./example.ini                         # parameters required for the pipeline 
- ./scritps/                            # all required scripts
- ./data/			       # required data for taxonomy
- ./test/			       # example
+ - ./MCSC_decontamination.sh             # script for pipeline
+ - ./example.ini                         # parameters required for the pipeline 
+ - ./scritps/                            # all required scripts
+ - ./data/			       # required data for taxonomy
+ - ./test/			       # example
 
 ### Requirements ###
 
