@@ -56,6 +56,15 @@ source $OUT/param_file.txt
 
 rm param_file.txt
 
+
+# check if $WHITE_NAME is in $UNIREF90 under $TAXO_LVL taxonimic level
+TAXID=$(cat "${TAXDUMP}"/names.dmp | grep $'\t'${WHITE_NAME}$'\t' | cut -f 1)
+if [ -z $(cat "$UNIREF100" | cut -f 2 | grep -w "$TAXID" | head -n 1) ]; then
+    echo "The "$TAXO_LVL" "$WHITE_NAME" is not present in Uniref90 database. Aborting."
+    exit 1
+fi
+
+
 ## skip if you only need to run cluster evaluation with a different taxon
 if [ $# -eq 1 ]
 then
