@@ -73,7 +73,7 @@ then
 	fi
 
 	## Extract DIAMOND blast taxonomy
-	perl "${MCSC}"/scripts/daa_to_tagc.pl $UNIREF100 "${OUT}"/"${NAME}".daa
+	perl "${MCSC}"/scripts/daa_to_tagc.pl "$UNIREF100" "${OUT}"/"${NAME}".daa
 	
 	## Format the DIAMOND output 
 	perl "${MCSC}"/scripts/get_taxa_from_diamond.pl "${OUT}"/"${NAME}".daa.tagc \
