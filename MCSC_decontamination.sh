@@ -102,11 +102,25 @@ perl $MCSC/scripts/cluster_eval.pl $OUT $OUT/taxo_uniq.txt $TAXO_LVL $WHITE_NAME
 ## print a plot of the cluster evaluation
 R CMD BATCH --no-save --no-restore "--args $OUT/cluster_eval.tsv" $MCSC/scripts/clusters_evaluation.R $OUT/clusters_evaluation.Rout
 
-FILES=$(grep -o "\w*.fasta" $OUT/clusters_evaluation.Rout)
-echo $FILES
+## extract the file names from the R output
+FILES=($(grep ".fasta" "${OUT}"/clusters_evaluation.Rout | sed "s/.*"$NAME"/"$NAME"/"))
 
-cat $FILES > $OUT/${NAME}_decont.fasta
+## print the "good" cluster files on scree
+echo "${FILES[@]}" | tr " " "\n"
 
+## merge the "good" cluster files in a new fasta file labeled "decont"
+counter=0
+for f in "${FILES[@]}"; do
+    let counter+=1
+    if [ "$counter" -eq 1 ]; then
+        cat "$f" > "${OUT}"/"${NAME}"_decont.fasta
+    else
+        cat "$f" >> "${OUT}"/"${NAME}"_decont.fasta
+    fi
+done
+
+## move the cluster files in a sub directory
 mkdir $OUT/clusters
 mv $OUT/*cluster_*.fasta $OUT/clusters/
 
+echo "Done"
