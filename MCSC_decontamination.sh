@@ -90,6 +90,8 @@ then
 
 fi
 
+
+
 FILE=$(basename "$FASTA")
 NAME="${FILE%.*}"
 
@@ -108,14 +110,16 @@ FILES=($(grep ".fasta" "${OUT}"/clusters_evaluation.Rout | sed "s/.*"$NAME"/"$NA
 ## print the "good" cluster files on scree
 echo "${FILES[@]}" | tr " " "\n"
 
+
+
 ## merge the "good" cluster files in a new fasta file labeled "decont"
 counter=0
 for f in "${FILES[@]}"; do
     let counter+=1
     if [ "$counter" -eq 1 ]; then
-        cat "$f" > "${OUT}"/"${NAME}"_decont.fasta
+        cat $OUT/$f > "${OUT}"/"${NAME}"_decont.fasta
     else
-        cat "$f" >> "${OUT}"/"${NAME}"_decont.fasta
+        cat $OUT/$f >> "${OUT}"/"${NAME}"_decont.fasta
     fi
 done
 

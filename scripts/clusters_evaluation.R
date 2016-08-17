@@ -70,7 +70,10 @@ for( i in unique(tab$group)[order(unique(tab$group))]){
 
 mx = max.col(t(ssr))
 
-cl_max = max.col(t(kmeans(tab$WR[which(tab$group == mx)],centers=2)[[2]]))
-cl = kmeans(tab$WR[which(tab$group == mx)],centers=2)[[1]]
+km = kmeans(tab$WR[which(tab$group == mx)],centers=2)
+
+cl_max = max.col(t(km$centers))
+cl = km$cluster
+
 data.frame(rownames(tab)[which(tab$group == mx)][which(cl==cl_max)])
 
