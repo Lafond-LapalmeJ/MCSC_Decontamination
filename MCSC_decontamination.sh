@@ -4,9 +4,9 @@
 # This script run the MCSC decontamination pipeline.
 #
 # To run this script, you need:
-#	Perl > 5.18.2
-#	DIAMOND blast (in your $PATH)
-#	UNIREF90 and UNIREF100 databases
+#    Perl > 5.18.2
+#    DIAMOND blast (in your $PATH)
+#    UNIREF90 and UNIREF100 databases
 #
 # Usage
 # MCSC_decontamination.sh file.ini
@@ -21,8 +21,8 @@ FASTA=""
 # $LVL: clustering level (integer) 3 = 8 clusters, 4 = 16 clusters (default 32)
 LVL=5
 
-# $OUT: Directory to output the clusters (default PWD)
-OUT=$PWD
+# "${OUT}": Directory to output the clusters (default PWD)
+OUT="$PWD"
 
 # $UNIREF90: path to the DIAMOND UNIREF90 database (REQUIRED) 
 UNIREF90=""
@@ -33,7 +33,7 @@ UNIREF100=""
 # $TAXDUMP: path to the NCBI taxonomy dump (REQUIRED)
 TAXDUMP=""
 
-# $MCSC: path to the MCSC_Decontamination folder (REQUIRED)
+# "${MCSC}": path to the MCSC_Decontamination folder (REQUIRED)
 MCSC=""
 
 # $TAXO_LVL: taxonomic level for the WR index (default: phylum)
@@ -50,67 +50,127 @@ T=8
 
 
 
-grep "=" $1 > $OUT/param_file.txt
+grep "=" $1 > "${OUT}"/param_file.txt
 
-source $OUT/param_file.txt
+source "${OUT}"/param_file.txt
 
 rm param_file.txt
+
+#check if $WHITE_NAME is in $UNIREF90
+TAXID=$(cat "${TAXDUMP}"/names.dmp | grep $'\t'${WHITE_NAME}$'\t' | cut -f 1)
+if [ -z $(cat "$UNIREF100" | cut -f 2 | grep -w "$TAXID" | head -n 1) ]; then
+    echo "The "$TAXO_LVL" "$WHITE_NAME" is not present in Uniref90 database. Aborting."
+    exit 1
+fi
+
+
+
+FILE="$(basename "$FASTA")"
+NAME="${FILE%.*}"
+
 
 ## skip if you only need to run cluster evaluation with a different taxon
 if [ $# -eq 1 ]
 then
 
-	mkdir -p "$OUT"	
+    mkdir -p "${OUT}"
 
-	## get the fasta name
-	FILE=$(basename "$FASTA")
-	NAME="${FILE%.*}"
+    #convert fastq to fasta if detected
+    #check if input file is valid
+    echo "Validating input file format..."
+    if [ $(grep -F ".fastq" <<< "$FASTA") ]; then #is input fastq file? Check file extension fisrt.
+        if [ "${FASTA##*.}" == "gz" ]; then #is it gzipped?
+            LINE1="$(zcat "$FASTA" | head -n 1)" #assuming the first line is a sequence header
+            CHAR1="${LINE1:0:1}"
+             if [ "$CHAR1" == "@" ]; then
+                echo "Converting fastq to fasta..."
+                zcat "$FASTA" | awk '{if(NR%4==1) {printf(">%s\n",substr($0,2));} else if(NR%4==2) print;}' \
+                    > "${MCSC}"/data/file.fa
+                 FASTA="${MCSC}"/data/file.fa
+            else
+                echo "Invalid fastq file."
+                exit 1
+            fi
+        else
+            LINE1="$(cat "$FASTA" | head -n 1)"
+            CHAR1="${LINE1:0:1}"
+            if [ "$CHAR1"0 == "@" ]; then
+                echo "Converting fastq to fasta..."
+                cat "$FASTA" | awk '{if(NR%4==1) {printf(">%s\n",substr($0,2));} else if(NR%4==2) print;}' \
+                    > "${MCSC}"/data/file.fa
+                FASTA="${MCMC}"/data/file.fa
+            else
+                echo "Invalid fastq file."
+                exit 1
+            fi
+        fi
+    else #it's a fasta
+        LINE1="$(cat "$FASTA" | head -n 1)"
+        CHAR1="${LINE1:0:1}"
+        if [ "$CHAR1" != ">" ]; then
+            echo "Invalid fasta file."
+            exit 1
+        fi
+    fi
 
-	## DIAMOND blast
-	if ! [ -e $OUT/$NAME.daa ]
-	then
-		diamond blastx -d $UNIREF90 -q $FASTA -a $OUT/$NAME -t $OUT -p $T
-	fi
+    echo "Input file format seems to be OK."
 
-	## Extract DIAMOND blast taxonomy
-	perl $MCSC/scripts/daa_to_tagc.pl $UNIREF100 $OUT/${NAME}.daa
-	
-	## Format the DIAMOND output 
-	perl $MCSC/scripts/get_taxa_from_diamond.pl $OUT/$NAME.daa.tagc \
-	$TAXDUMP/names.dmp $TAXDUMP/nodes.dmp > $OUT/temp.txt
-	sort -rk3,3 $OUT/temp.txt | sort -uk1,1 > $OUT/taxo_uniq.txt  
-	sed "s/'\"//g" $OUT/taxo_uniq.txt > $OUT/temp.txt
-	mv $OUT/temp.txt $OUT/taxo_uniq.txt
+    ## DIAMOND blast
+    if [ ! -f "${OUT}"/"${NAME}".daa ]
+    then
+        echo "Running DIAMOND blast..."
+        diamond blastx \
+            -d "$UNIREF90" \
+            -q "$FASTA" \
+            -a "${OUT}"/"${NAME}" \
+            -t "${OUT}" \
+            -p "$T"
+    fi
 
-	## MCSC clusters name        
-	OUT_NAME=${OUT}/${NAME}_ 
+    ## Extract DIAMOND blast taxonomy
+    echo "Extracting DIAMOND blast taxonomy..."
+    perl "${MCSC}"/scripts/daa_to_tagc.pl \
+        "$UNIREF100" \
+        "${OUT}"/"${NAME}".daa
+    
+    ## Format extracted DIAMOND blast taxonomy
+    echo "Formating the DIAMOND output..."
+    perl "${MCSC}"/scripts/get_taxa_from_diamond.pl \
+        "${OUT}"/"${NAME}".daa.tagc \
+        "${TAXDUMP}"/names.dmp \
+        "${TAXDUMP}"/nodes.dmp | \
+    sort -rk3,3 -uk1,1 | \
+    sed "s/'\"//g" > "${OUT}"/taxo_uniq.txt
 
-	## MCSC algorithm
-	$MCSC/scripts/mcsc_fix $FASTA $((LVL+1)) $OUT_NAME
+    ## MCSC clusters name        
+    OUT_NAME=""${OUT}"/"${NAME}"_"
 
+    ## MCSC algorithm
+    echo "Running the MCSC algorithm..."
+    "${MCSC}"/scripts/mcsc_fix "$FASTA" $((LVL+1)) "$OUT_NAME"
 fi
 
-
-
-FILE=$(basename "$FASTA")
-NAME="${FILE%.*}"
-
-
 ## compute WR index and evaluate clusters 
-perl $MCSC/scripts/cluster_eval.pl $OUT $OUT/taxo_uniq.txt $TAXO_LVL $WHITE_NAME	
-
+echo "Computing the White-Ratio (WR) index and evaluating the clusters..."
+perl "${MCSC}"/scripts/cluster_eval.pl \
+    "$OUT" \
+    "${OUT}"/taxo_uniq.txt \
+    "$TAXO_LVL" \
+    "$WHITE_NAME"    
 
 
 ## print a plot of the cluster evaluation
-R CMD BATCH --no-save --no-restore "--args $OUT/cluster_eval.tsv" $MCSC/scripts/clusters_evaluation.R $OUT/clusters_evaluation.Rout
+echo -e "Printing MCSC output results..."
+R CMD BATCH --no-save --no-restore \
+    "--args $OUT/cluster_eval.tsv" \
+    "${MCSC}"/scripts/clusters_evaluation.R \
+    "${OUT}"/clusters_evaluation.Rout
 
 ## extract the file names from the R output
 FILES=($(grep ".fasta" "${OUT}"/clusters_evaluation.Rout | sed "s/.*"$NAME"/"$NAME"/"))
 
 ## print the "good" cluster files on scree
 echo "${FILES[@]}" | tr " " "\n"
-
-
 
 ## merge the "good" cluster files in a new fasta file labeled "decont"
 counter=0
@@ -124,7 +184,8 @@ for f in "${FILES[@]}"; do
 done
 
 ## move the cluster files in a sub directory
-mkdir $OUT/clusters
-mv $OUT/*cluster_*.fasta $OUT/clusters/
+mkdir "${OUT}"/clusters
+mv "${OUT}"/*cluster_*.fasta "${OUT}"/clusters/
 
 echo "Done"
+
