@@ -56,14 +56,6 @@ source "${OUT}"/param_file.txt
 
 rm param_file.txt
 
-#check if $WHITE_NAME is in $UNIREF90
-TAXID=$(cat "${TAXDUMP}"/names.dmp | grep $'\t'${WHITE_NAME}$'\t' | cut -f 1)
-if [ -z $(cat "$UNIREF100" | cut -f 2 | grep -w "$TAXID" | head -n 1) ]; then
-    echo "The "$TAXO_LVL" "$WHITE_NAME" is not present in Uniref90 database. Aborting."
-    exit 1
-fi
-
-
 
 FILE="$(basename "$FASTA")"
 NAME="${FILE%.*}"
@@ -105,7 +97,7 @@ then
             fi
         fi
     else #it's a fasta
-        LINE1="$(cat "$FASTA" | head -n 1)"
+        LINE1="$(head -n 1 $FASTA)"
         CHAR1="${LINE1:0:1}"
         if [ "$CHAR1" != ">" ]; then
             echo "Invalid fasta file."
@@ -139,7 +131,7 @@ then
         "${OUT}"/"${NAME}".daa.tagc \
         "${TAXDUMP}"/names.dmp \
         "${TAXDUMP}"/nodes.dmp | \
-    sort -rk3,3 -uk1,1 | \
+    sort -rnk3,3 | sort -uk1,1 | \
     sed "s/'\"//g" > "${OUT}"/taxo_uniq.txt
 
     ## MCSC clusters name        
@@ -150,6 +142,7 @@ then
     "${MCSC}"/scripts/mcsc_fix "$FASTA" $((LVL+1)) "$OUT_NAME"
 fi
 
+
 ## compute WR index and evaluate clusters 
 echo "Computing the White-Ratio (WR) index and evaluating the clusters..."
 perl "${MCSC}"/scripts/cluster_eval.pl \
@@ -157,6 +150,14 @@ perl "${MCSC}"/scripts/cluster_eval.pl \
     "${OUT}"/taxo_uniq.txt \
     "$TAXO_LVL" \
     "$WHITE_NAME"    
+
+
+## Check if white_name is in the taxonomy file
+if [ -z $(grep -m 1 -o "${TAXO_LVL:0:2}_${WHITE_NAME}" $OUT/taxo_uniq.txt) ]; then
+    echo "The "$TAXO_LVL" "$WHITE_NAME" is not present in taxo_uniq.txt file. Aborting."
+    exit 1
+fi
+
 
 
 ## print a plot of the cluster evaluation
