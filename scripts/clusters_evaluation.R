@@ -64,6 +64,12 @@ for( i in unique(tab$group)[order(unique(tab$group))]){
     bet = kmeans(tab$WR[which(tab$group == i)],centers = 2)[[6]]
     tot = kmeans(tab$WR[which(tab$group == i)],centers = 2)[[3]]
     ssr[i] = bet/tot
+    km = kmeans(tab$WR[which(tab$group == i)],centers = 2)
+    if(length(which(km$cluster==1))==1 | length(which(km$cluster==2))==1)
+    {
+	ssr[i]=0.01
+    }
+    print(paste(i,ssr[i]))
   }
 }
 
@@ -71,6 +77,7 @@ for( i in unique(tab$group)[order(unique(tab$group))]){
 mx = max.col(t(ssr))
 
 km = kmeans(tab$WR[which(tab$group == mx)],centers=2)
+km
 
 cl_max = max.col(t(km$centers))
 cl = km$cluster

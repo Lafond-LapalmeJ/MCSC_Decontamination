@@ -32,7 +32,7 @@ my %clusterhash;
 
 
 my $tx = "";
-if($taxo_level =~ /kingdom/){$tx = "ph";}
+if($taxo_level =~ /kingdom/){$tx = "ki";}
 elsif($taxo_level =~ /phylum/){$tx = "ph";}
 elsif($taxo_level =~ /class/){$tx = "cl";}
 elsif($taxo_level =~ /order/){$tx = "or";}

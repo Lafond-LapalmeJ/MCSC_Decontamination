@@ -103,3 +103,12 @@ Also if you misspelled the target taxon ($WHITE) you can run only the WR index c
 ```
 sh MCSC_Decontamination file.ini --recalculate
 ```
+
+### Alignment correction
+The parameter AST (alignment score threshold) is disable by default (AST=-1).
+With a AST value greater or equal than 0, Sequences with an alignment and a BIT score higher the AST value are classified by the taxonomy of that alignment instead of being classified with the MCSC cluster.
+All the sequences without alignment to the database are classified according to the MCSC clustering.
+Finally, sequences with a BIT score lower than the AST value are classified according to their MCSC cluster.
+
+For example, if we set the AST to 100 and we want to decontaminate a nematode transcriptome. A sequence with an alignment to a non-nematode with a BIT score over 100 will be discarded whatever the clustering of this sequence and a sequence with an alignment to a nematode with a BIT score over 100 will be kept in the decontaminated transcriptome. Setting the AST to 0 means to classify all sequences that have an alignment by the taxonomy of this alignment and setting the AST to infinity (or any very large number) means that no sequence will be classified according to the alignment which comes back to the default decontamination method.
+
