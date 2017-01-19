@@ -7,9 +7,7 @@ Author: Joel Lafond Lapalme
 email for questions/support: joel.lafond.lapalme@gmail.com
 
 
-For more information on the method, see the paper at
-Submited to Bioinformatics
-
+For more information on the method, see the paper at: https://academic.oup.com/bioinformatics/article-abstract/doi/10.1093/bioinformatics/btw793/2736361/A-new-method-for-decontamination-of-de-novo
 ### Included ###
  
  ./MCSC_decontamination.sh             # script for pipeline
