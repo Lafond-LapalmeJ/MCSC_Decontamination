@@ -116,7 +116,7 @@ then
     echo "Input file format seems to be OK."
 
     ## DIAMOND blast
-    if [ ! -f "${OUT}"/"${NAME}".daa ]
+    if [ ! -f "${OUT}"/"${NAME}".tsv ]
     then
         echo "Running DIAMOND blast..."
         diamond blastx \
