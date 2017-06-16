@@ -10,11 +10,11 @@ email for questions/support: joel.lafond.lapalme@gmail.com
 For more information on the method, see the paper at: https://academic.oup.com/bioinformatics/article-abstract/doi/10.1093/bioinformatics/btw793/2736361/A-new-method-for-decontamination-of-de-novo
 ### Included ###
  
- ./MCSC_decontamination.sh             # script for pipeline
- ./example.ini                         # parameters required for the pipeline 
- ./scritps/                            # all required scripts
- ./data/			       # required data for taxonomy
- ./test/			       # example
+ - ./MCSC_decontamination.sh             # script for pipeline
+ - ./example.ini                         # parameters required for the pipeline 
+ - ./scritps/                            # all required scripts
+ - ./data/			       # required data for taxonomy
+ - ./test/			       # example
 
 ### Requirements ###
 
