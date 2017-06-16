@@ -36,10 +36,10 @@ if($taxo_level =~ /kingdom/){$tx = "ki";}
 elsif($taxo_level =~ /phylum/){$tx = "ph";}
 elsif($taxo_level =~ /class/){$tx = "cl";}
 elsif($taxo_level =~ /order/){$tx = "or";}
-elsif($taxo_level =~ /familly/){$tx = "fa";}
+elsif($taxo_level =~ /family/){$tx = "fa";}
 elsif($taxo_level =~ /genus/){$tx = "ge";}
 elsif($taxo_level =~ /species/){$tx = "sp";}
-else{die "Wrong taxonomic rank. Choices are kingdom, phylum, class, order, familly, genus, species. You enter $taxo_level";}
+else{die "Wrong taxonomic rank. Choices are kingdom, phylum, class, order, family, genus, species. You enter $taxo_level";}
 
 print "The $taxo_level to keep is $white_name\n";
 print "Top $taxo_level in $blast_out :\n";
