@@ -25,7 +25,7 @@ bitmap(file = paste(path,"/",name,"_clusters_evaluation",".jpeg",sep=""),type="j
 #par(mar=c(4,4,1,1))
 plot(rep(0,length(unique(group)))+0.8,xaxt="n",lwd=2,xlab="Level of clustering",col=0,ylab="WR",type="l",ylim=c(0,1))#c(min(tab[,n]),max(tab[,n])))
 axis(side = 1,at = 1:7,labels = c(2,4,8,16,32,64,128))
-rect(par("usr")[1],par("usr")[3],par("usr")[2],par("usr")[4],col = "gray",)
+rect(par("usr")[1],par("usr")[3],par("usr")[2],par("usr")[4],col = "gray")
 abline(h = seq(0,to=1,by=0.2),col="white",lwd=0.5, v = 1:length(unique(group)))
 
 rec_cluster_tree = function(data, cl, index){
@@ -33,7 +33,7 @@ rec_cluster_tree = function(data, cl, index){
   
   limite = max(nchar(data$Cluster))
   k = which(colnames(data)==index)
-  if(data$group[cl]==limite){
+  if(!limite==TRUE || data$group[cl]==limite){
     return()
   }
   
