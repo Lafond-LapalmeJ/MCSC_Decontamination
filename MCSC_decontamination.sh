@@ -124,7 +124,6 @@ then
             -q "$FASTA" \
             -o "${OUT}"/"${NAME}".tsv \
             -f 6 \
-            -t "${OUT}" \
             -p "$T"
     fi
 
