@@ -33,7 +33,10 @@ rec_cluster_tree = function(data, cl, index){
   
   limite = max(nchar(data$Cluster))
   k = which(colnames(data)==index)
-  if(!limite==TRUE || data$group[cl]==limite){
+  if (!length(as.numeric(cl))){
+    return()
+  }
+  if(data$group[cl]==limite){
     return()
   }
   
