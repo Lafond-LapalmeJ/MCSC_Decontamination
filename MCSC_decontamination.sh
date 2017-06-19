@@ -139,8 +139,10 @@ then
         "${OUT}"/"${NAME}".tsv.tagc \
         "${TAXDUMP}"/names.dmp \
         "${TAXDUMP}"/nodes.dmp | \
-    sort -rnk3,3 | sort -uk1,1 | \
-    sed "s/'\"//g" > "${OUT}"/taxo_uniq.txt
+    	sort -k1,1 -rk3,3 | \
+	sort -uk1,1 | \
+    	sed "s/'\"//g" \
+	> "${OUT}"/taxo_uniq.txt
 
     ## MCSC clusters name        
     OUT_NAME=""${OUT}"/"${NAME}"_"
