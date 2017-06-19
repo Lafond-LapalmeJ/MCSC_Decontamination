@@ -155,7 +155,7 @@ then
 fi
 
 ## Create a temporary fasta to match the blast sequence name
-sed 's/\s.*$//g' $FASTA > "${OUT}"/temp.fasta
+sed 's/\s.*$//g' $FASTA > "${OUT}"/seq.tmp
 
 
 ## compute WR index and evaluate clusters 
@@ -199,7 +199,7 @@ if [ "$AST" -ge 0 ];then
 	sort -uk1,1 $OUT/keep.txt > $OUT/temp.txt
 	comm -23 $OUT/temp.txt $OUT/reject.txt > $OUT/keep_final.txt
 
-	perl $MCSC/scripts/getFastaFromList.pl $OUT/temp.fasta list $OUT/keep_final.txt > "${OUT}"/"${NAME}"_decont.fasta
+	perl $MCSC/scripts/getFastaFromList.pl "${OUT}"/seq.tmp list $OUT/keep_final.txt > "${OUT}"/"${NAME}"_decont.fasta
 else
 	## merge the "good" cluster files in a new fasta file labeled "decont"
 	counter=0
