@@ -49,19 +49,86 @@ T=8
 AST=-1
 
 
+######################################################################
+
+
+function print_help() {
+    echo "\
+Usage: bash MCSC_decontamination.sh [option flags]
+
+Mandatory flags:
+
+    -i      The ".ini" file
+    -t      The assembly type:
+                "long": e.g. a genome assembly
+                or
+                "short": e.g. a transciptome assembly
+
+Optional flag:
+
+    -r      Recalculate. Only runs the WR index calculation provided you
+            already have the blast output file in the output directory
+"
+exit 1
+}
+
+
+#http://wiki.bash-hackers.org/howto/getopts_tutorial
+# Default values
+ini_file=""
+ass_type=""
+recalc=0
+
+options=':i:t:rh'
+
+while getopts "$options" opt; do
+    case "$opt" in
+        i)
+            ini_file="$OPTARG"
+            ;;
+        o)
+            ass_type="$OPTARG"
+            ;;
+        r)
+            recalc=1
+            ;;
+        h)
+            print_help
+            ;;
+        \?)
+            echo "Invalid option: -"$OPTARG"" >&2
+            print_help
+            ;;
+        :)
+            echo "Option -"$OPTARG" requires an argument." >&2
+            print_help
+            ;;
+    esac
+done
+
+# get all options
+shift $(($OPTIND - 1))
+
+
+
 ### parameter validation
 
-grep "=" $1 > "${OUT}"/param_file.txt
-
-source "${OUT}"/param_file.txt
-
-rm param_file.txt
-
-## Check AST parameter
-if [ "$AST" -ge 0 ];then
-	echo "Using alignment correction for sequences with BIT score higher than $AST";
+if [ -s "$ini_file" ]; then
+    source "$ini_file"
 else
-	echo "Not using alignment correction";
+    echo "Invalid \".ini\" file. See \"example.ini\" for correct format."
+    exit 1;
+fi
+
+if [ ! ass_type ]; then
+    echo "Please provide the assembly type"
+    print_help
+fi
+
+
+if [ "$ass_type" != "long" ] || [ "$ass_type" != "short" ]; then
+    echo "Wrong assebly type provided."
+    print_help
 fi
 
 
@@ -69,10 +136,28 @@ FILE="$(basename "$FASTA")"
 NAME="${FILE%.*}"
 
 
-## skip if you only need to run cluster evaluation with a different taxon
-if [ $# -eq 1 ]
-then
+# Check if blast output is available if only want to recalculate
+if [ "$recalc" -eq 1 ]
+    if [ ! -s "${OUT}"/"${NAME}".tsv ] ]
+        echo "BLAST output file not found. Cannot recalcutle WR."
+        exit 1
+    fi
+fi
 
+
+## Check AST parameter
+if [ "$AST" -ge 0 ];then
+    echo "Using alignment correction for sequences with BIT score higher than $AST";
+else
+    echo "Not using alignment correction.";
+fi
+
+
+######################################################################
+
+
+## skip if you only need to run cluster evaluation with a different taxon
+if [ "$recalc" -eq 0 ]; then
     mkdir -p "${OUT}"
 
     #convert fastq to fasta if detected
@@ -115,47 +200,74 @@ then
 
     echo "Input file format seems to be OK."
 
-    ## DIAMOND blast
-    if [ ! -f "${OUT}"/"${NAME}".tsv ]
-    then
-        echo "Running DIAMOND blast..."
-        diamond blastx \
-            -d "$UNIREF90" \
-            -q "$FASTA" \
-            -o "${OUT}"/"${NAME}".tsv \
-            -f 6 \
-            -p "$T"
+    if [ "$ass_type" = "short" ]; then
+        ## DIAMOND blast
+        if [ ! -s "${OUT}"/"${NAME}".tsv ]; then  # Don't rerun if output already present
+            echo "Running DIAMOND blast..."
+            # Default: qseqid sseqid pident length mismatch gapopen qstart qend sstart send evalue bitscore
+            diamond blastx \
+                -d "$UNIREF90" \
+                -q "$FASTA" \
+                -o "${OUT}"/"${NAME}".tsv \
+                -f 6 \
+                -p "$T"
+
+            ## Extract taxonomy
+            echo "Extracting DIAMOND blast taxonomy..."
+            perl "${MCSC}"/scripts/diamond_to_tagc.pl \
+                "$UNIREF100" \
+                "${OUT}"/"${NAME}".tsv
+        fi
+
+    else  # if [ "$ass_type" = "long" ]
+        # check if nt databse is available in the $BLASTDB envrionement variable
+        nt_installed=$(echo "$BLASTDB" | grep -F "/nt")
+        if [ -z "$nt_installed" ]; then
+            echo "Could not find \"nt\" database pathe in \$BLASTDB environment variable"
+            exit 1
+        fi
+
+        # run blast on nt using all CPUs
+        blastn \
+            -task megablast \
+            -query "$FASTA" \
+            -db nt \
+            -out "${OUT}"/"${NAME}".tsv.tagc \
+            -outfmt '6 qseqid staxid bitscore' \
+            -culling_limit 5 \
+            -evalue 1e-25 \
+            -num_threads "$T"
+
+        fi
     fi
 
-    ## Extract DIAMOND blast taxonomy
-    echo "Extracting DIAMOND blast taxonomy..."
-    perl "${MCSC}"/scripts/diamond_to_tagc.pl \
-        "$UNIREF100" \
-        "${OUT}"/"${NAME}".tsv
-    
     ## Format extracted DIAMOND blast taxonomy
     echo "Formating the DIAMOND output..."
     perl "${MCSC}"/scripts/get_taxa_from_diamond.pl \
         "${OUT}"/"${NAME}".tsv.tagc \
         "${TAXDUMP}"/names.dmp \
-        "${TAXDUMP}"/nodes.dmp | \
-    sort -rnk3,3 | sort -uk1,1 | \
-    sed "s/'\"//g" > "${OUT}"/taxo_uniq.txt
+        "${TAXDUMP}"/nodes.dmp \
+        | sort -k1,1 -rk3,3 \
+        | sort -uk1,1 \
+        | sed "s/'\"//g" \
+        > "${OUT}"/taxo_uniq.txt
 
     ## MCSC clusters name        
     OUT_NAME=""${OUT}"/"${NAME}"_"
 
     ## MCSC algorithm
+    # Output is a bunch of fasta files
     echo "Running the MCSC algorithm..."
-    "${MCSC}"/scripts/mcsc_fix "$FASTA" $((LVL+1)) "$OUT_NAME"
+    "${MCSC}"/scripts/mcsc_fix \
+        "$FASTA" \
+        $((LVL+1)) \
+        "$OUT_NAME"
 
     sed -i 's/\s.*$//g' ${OUT_NAME}*.fasta
-
-
 fi
 
 ## Create a temporary fasta to match the blast sequence name
-sed 's/\s.*$//g' $FASTA > "${OUT}"/temp.fasta
+sed 's/\s.*$//g' $FASTA > "${OUT}"/seq.tmp
 
 
 ## compute WR index and evaluate clusters 
@@ -164,16 +276,13 @@ perl "${MCSC}"/scripts/cluster_eval.pl \
     "$OUT" \
     "${OUT}"/taxo_uniq.txt \
     "$TAXO_LVL" \
-    "$WHITE_NAME"    
-
+    "$WHITE_NAME"
 
 ## Check if white_name is in the taxonomy file
 if [ -z $(grep -m 1 -o "${TAXO_LVL:0:2}_${WHITE_NAME}" $OUT/taxo_uniq.txt) ]; then
     echo "The "$TAXO_LVL" "$WHITE_NAME" is not present in taxo_uniq.txt file. Aborting."
     exit 1
 fi
-
-
 
 ## print a plot of the cluster evaluation
 echo -e "Printing MCSC output results..."
@@ -188,36 +297,33 @@ FILES=($(grep ".fasta" "${OUT}"/clusters_evaluation.Rout | sed "s/.*"$NAME"/"$NA
 ## print the "good" cluster files on screen
 echo "${FILES[@]}" | tr " " "\n"
 
-
 if [ "$AST" -ge 0 ];then
-	awk -F "\t" -v var="$WHITE_NAME" -v align_th="$AST" '{ if ($3 > align_th && $4 ~ var) print $1}' $OUT/taxo_uniq.txt > $OUT/keep.txt
-	awk -F "\t" -v var="$WHITE_NAME" -v align_th="$AST" '{ if (($3 > align_th) && (!($4 ~ var))) print $1}' $OUT/taxo_uniq.txt > $OUT/reject.txt
-	for f in "${FILES[@]}"; do
-		grep "^>" $OUT/$f | sed 's/>//' | sed 's/;clust_.*//' | sed 's/;repSeq_.*//' >> $OUT/keep.txt
-	done
+    awk -F "\t" -v var="$WHITE_NAME" -v align_th="$AST" '{ if ($3 > align_th && $4 ~ var) print $1}' $OUT/taxo_uniq.txt > $OUT/keep.txt
+    awk -F "\t" -v var="$WHITE_NAME" -v align_th="$AST" '{ if (($3 > align_th) && (!($4 ~ var))) print $1}' $OUT/taxo_uniq.txt > $OUT/reject.txt
+    for f in "${FILES[@]}"; do
+        grep "^>" $OUT/$f | sed 's/>//' | sed 's/;clust_.*//' | sed 's/;repSeq_.*//' >> $OUT/keep.txt
+    done
 
-	sort -uk1,1 $OUT/keep.txt > $OUT/temp.txt
-	comm -23 $OUT/temp.txt $OUT/reject.txt > $OUT/keep_final.txt
+    sort -uk1,1 $OUT/keep.txt > $OUT/temp.txt
+    comm -23 $OUT/temp.txt $OUT/reject.txt > $OUT/keep_final.txt
 
-	perl $MCSC/scripts/getFastaFromList.pl $OUT/temp.fasta list $OUT/keep_final.txt > "${OUT}"/"${NAME}"_decont.fasta
+    perl $MCSC/scripts/getFastaFromList.pl $OUT/seq.tmp list $OUT/keep_final.txt > "${OUT}"/"${NAME}"_decont.fasta
 else
-	## merge the "good" cluster files in a new fasta file labeled "decont"
-	counter=0
-	for f in "${FILES[@]}"; do
-	let counter+=1
-	if [ "$counter" -eq 1 ]; then
-		cat $OUT/$f > "${OUT}"/"${NAME}"_decont.fasta
-	else
-		cat $OUT/$f >> "${OUT}"/"${NAME}"_decont.fasta
-	fi
-	done
+    ## merge the "good" cluster files in a new fasta file labeled "decont"
+    counter=0
+    for f in "${FILES[@]}"; do
+    let counter+=1
+    if [ "$counter" -eq 1 ]; then
+        cat $OUT/$f > "${OUT}"/"${NAME}"_decont.fasta
+    else
+        cat $OUT/$f >> "${OUT}"/"${NAME}"_decont.fasta
+    fi
+    done
 fi
 
 ## move the cluster files in a sub directory
-mkdir "${OUT}"/clusters
+[ -d "${OUT}"/clusters ] || mkdir "${OUT}"/clusters
 mv "${OUT}"/*cluster_*.fasta "${OUT}"/clusters/
 rm $OUT/temp*
 
-
 echo "Done"
-
