@@ -24,7 +24,7 @@ LVL=5
 # "${OUT}": Directory to output the clusters (default PWD)
 OUT="$PWD"
 
-# $UNIREF90: path to the DIAMOND UNIREF90 database (REQUIRED) 
+# $UNIREF90: path to the DIAMOND UNIREF90 database (REQUIRED)
 UNIREF90=""
 
 # $UNIREF100: path to the UNIREF100 taxonomy list (REQUIRED)
@@ -34,7 +34,7 @@ UNIREF100=""
 TAXDUMP=""
 
 # "${MCSC}": path to the MCSC_Decontamination folder (REQUIRED)
-MCSC=""
+MCSC="$(dirname "$(readlink -f "$0")")"
 
 # $TAXO_LVL: taxonomic level for the WR index (default: phylum)
 TAXO_LVL="phylum"
@@ -48,14 +48,27 @@ T=8
 # $AST: alignment score threshold for alignment correction. Default -1 value means not using it. To use it, use value over or equal to 0
 AST=-1
 
+# $UNCOMPRESSED: Where uncompressed files will be stored when is decrompression is needed. By default, it will be in the $OUT/uncompressed directory. Will be removed at the end of the process. Uncomment it to set it. (OPTIONAL)
+#UNCOMPRESSED="${OUT}/uncompressed"
 
 ### parameter validation
 
-grep "=" $1 > "${OUT}"/param_file.txt
+if [ "$#" -eq 0 ]; then
+	echo "Please look at the ${MCSC}/example.ini file for a model"
+	echo "Documentation is available in ${MCSC}/README.md file"
+	exit 1
+fi
 
-source "${OUT}"/param_file.txt
+PARAM_FILE="$(mktemp)"
+# remove MCSC= for compatibility with non modified .ini files.
+grep "=" $1 | grep -v "MCSC=" > "${PARAM_FILE}"
+source "${PARAM_FILE}"
+rm "${PARAM_FILE}"
 
-rm param_file.txt
+## create uncompressed dir
+if [ ! "${UNCOMPRESSED}" ]; then
+	UNCOMPRESSED="${OUT}/uncompressed"
+fi
 
 ## Check AST parameter
 if [ "$AST" -ge 0 ];then
@@ -85,8 +98,8 @@ then
              if [ "$CHAR1" == "@" ]; then
                 echo "Converting fastq to fasta..."
                 zcat "$FASTA" | awk '{if(NR%4==1) {printf(">%s\n",substr($0,2));} else if(NR%4==2) print;}' \
-                    > "${MCSC}"/data/file.fa
-                 FASTA="${MCSC}"/data/file.fa
+                    > "${UNCOMPRESSED}"/data/file.fa
+                 FASTA="${UNCOMPRESSED}"/data/file.fa
             else
                 echo "Invalid fastq file."
                 exit 1
@@ -97,8 +110,8 @@ then
             if [ "$CHAR1"0 == "@" ]; then
                 echo "Converting fastq to fasta..."
                 cat "$FASTA" | awk '{if(NR%4==1) {printf(">%s\n",substr($0,2));} else if(NR%4==2) print;}' \
-                    > "${MCSC}"/data/file.fa
-                FASTA="${MCMC}"/data/file.fa
+                    > "${UNCOMPRESSED}"/data/file.fa
+                FASTA="${UNCOMPRESSED}"/data/file.fa
             else
                 echo "Invalid fastq file."
                 exit 1
@@ -132,7 +145,7 @@ then
     perl "${MCSC}"/scripts/diamond_to_tagc.pl \
         "$UNIREF100" \
         "${OUT}"/"${NAME}".tsv
-    
+
     ## Format extracted DIAMOND blast taxonomy
     echo "Formating the DIAMOND output..."
     perl "${MCSC}"/scripts/get_taxa_from_diamond.pl \
@@ -142,7 +155,7 @@ then
     sort -rnk3,3 | sort -uk1,1 | \
     sed "s/'\"//g" > "${OUT}"/taxo_uniq.txt
 
-    ## MCSC clusters name        
+    ## MCSC clusters name
     OUT_NAME=""${OUT}"/"${NAME}"_"
 
     ## MCSC algorithm
@@ -158,13 +171,13 @@ fi
 sed 's/\s.*$//g' $FASTA > "${OUT}"/temp.fasta
 
 
-## compute WR index and evaluate clusters 
+## compute WR index and evaluate clusters
 echo "Computing the White-Ratio (WR) index and evaluating the clusters..."
 perl "${MCSC}"/scripts/cluster_eval.pl \
     "$OUT" \
     "${OUT}"/taxo_uniq.txt \
     "$TAXO_LVL" \
-    "$WHITE_NAME"    
+    "$WHITE_NAME"
 
 
 ## Check if white_name is in the taxonomy file
@@ -217,7 +230,7 @@ fi
 mkdir "${OUT}"/clusters
 mv "${OUT}"/*cluster_*.fasta "${OUT}"/clusters/
 rm $OUT/temp*
-
+rm -rf "${UNCOMPRESSED}"
+unset UNCOMPRESSED
 
 echo "Done"
-
