@@ -54,7 +54,7 @@ AST=-1
 ### parameter validation
 
 if [ "$#" -eq 0 ]; then
-	echo "Please look at the ${MCSC}/example.ini file for a model"
+	echo "Please look at the ${MCSC}/example.abims.ini file for a model"
 	echo "Documentation is available in ${MCSC}/README.md file"
 	exit 1
 fi
