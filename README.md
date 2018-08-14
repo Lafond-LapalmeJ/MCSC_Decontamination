@@ -19,7 +19,7 @@ For more information on the method, see the paper at: https://academic.oup.com/b
 ### Requirements ###
 
  In order to run the pipeline you the need the following
- - DIAMOND (> 0.8.22) blast in your $PATH https://github.com/bbuchfink/diamond
+ - DIAMOND (v0.9.22; may work with older version) blast in your $PATH https://github.com/bbuchfink/diamond
  - perl 5.18.2 (Pipeline was test with this version, older version could work)
  - R 3.1.1 (Pipeline was test with this version, older version could work)
  - Uniref90 database build by DIAMOND makedb command (http://www.uniprot.org/downloads)
@@ -34,7 +34,7 @@ git clone https://github.com/Lafond-LapalmeJ/MCSC_Decontamination.git
 ```
 2) Install DIAMOND
 ```
-wget http://github.com/bbuchfink/diamond/releases/download/v0.8.22/diamond-linux64.tar.gz
+wget http://github.com/bbuchfink/diamond/releases/download/v0.9.22/diamond-linux64.tar.gz
 tar xzf diamond-linux64.tar.gz
 #add this line to your .bashrc to add DIAMOND in your $PATH
 export PATH=$PATH:PATH_TO_DIAMOND/diamondblast

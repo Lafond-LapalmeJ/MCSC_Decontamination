@@ -214,7 +214,7 @@ else
 fi
 
 ## move the cluster files in a sub directory
-mkdir "${OUT}"/clusters
+mkdir -p "${OUT}"/clusters
 mv "${OUT}"/*cluster_*.fasta "${OUT}"/clusters/
 rm $OUT/temp*
 

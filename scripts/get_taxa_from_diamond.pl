@@ -18,7 +18,7 @@ if (scalar(@ARGV) != 3)
 
 
 #2-Create hash with the names file where the keys are the taxids and the values are the names.
-# 11 seconds to run on Intel® Core i7-3820 CPU @ 3.60GHz × 8, 62.1 GB ram
+# 11 seconds to run on Intelï¿½ Core i7-3820 CPU @ 3.60GHz ï¿½ 8, 62.1 GB ram
 open(NAMES, "<", $namesFile) or die "Cannot open $namesFile: $!";
 my %names;
 while (my $line = <NAMES>)
@@ -48,7 +48,7 @@ close(NAMES);
 
 
 #3-Create hash with the nodes file where the keys are the taxids and the values are the parents.
-# 6 seconds to run on Intel® Core i7-3820 CPU @ 3.60GHz × 8, 62.1 GB ram
+# 6 seconds to run on Intelï¿½ Core i7-3820 CPU @ 3.60GHz ï¿½ 8, 62.1 GB ram
 open(NODES, "<", $nodesFile) or die "Cannot open $nodesFile: $!";
 my %nodes;
 my %rank;
@@ -93,7 +93,11 @@ foreach my $key (sort keys %taxids)
         my @taxo;
         while ($taxid > 1)
         {
-                $taxids{$key} = "_" . substr($rank{$taxid},0,2) . "_" . $names{$taxid} . ";$taxids{$key}"; 
+                my $tx_name = defined $names{$taxid} ? $names{$taxid} : '';
+                my $tx_rank = defined $rank{$taxid} ? substr($rank{$taxid},0,2) : '';
+
+
+                $taxids{$key} = "_" . $tx_rank . "_" . $tx_name . ";$taxids{$key}"; 
                 if (defined $nodes{$taxid}) #if taxid present in nodes.dmp
                 {
                         $taxid = $nodes{$taxid}; #grab the parent
