@@ -11,10 +11,15 @@ For more information on the method, see the paper at: https://academic.oup.com/b
 ### Included ###
  
  ./MCSC_decontamination.sh             # script for pipeline
+ 
  ./example.ini                         # parameters required for the pipeline 
+ 
  ./scritps/                            # all required scripts
+ 
  ./data/			       # required data for taxonomy
+ 
  ./test/			       # example
+ 
 
 ### Requirements ###
 
