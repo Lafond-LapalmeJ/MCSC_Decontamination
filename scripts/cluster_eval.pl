@@ -111,10 +111,15 @@ my $taxa2 = shift @best_tax;
 my $taxa3 = shift @best_tax;
 my $taxa4 = shift @best_tax;
 my $taxa5 = shift @best_tax;
+my $taxa6 = shift @best_tax;
+my $taxa7 = shift @best_tax;
+my $taxa8 = shift @best_tax;
+my $taxa9 = shift @best_tax;
+my $taxa10 = shift @best_tax;
 
 
 # Print header
-print OUTFILE "Cluster\tNb_contigs\tNb_hits\tWR\tNb_$taxa1\tNb_$taxa2\tNb_$taxa3\tNb_$taxa4\tNb_$taxa5\tother\tNb_no_hit\tBIT_score_sum_White\tBIT_score_sum_black\n";
+print OUTFILE "Cluster\tNb_contigs\tNb_hits\tWR\tNb_$taxa1\tNb_$taxa2\tNb_$taxa3\tNb_$taxa4\tNb_$taxa5\tNb_$taxa6\tNb_$taxa7\tNb_$taxa8\tNb_$taxa9\tNb_$taxa10\tother\tNb_no_hit\tBIT_score_sum_White\tBIT_score_sum_black\n";
 
 
 foreach my $cluster (keys %clusterhash) {
@@ -127,6 +132,11 @@ foreach my $cluster (keys %clusterhash) {
 		my $nb_taxa3 = 0;
 		my $nb_taxa4 = 0;
 		my $nb_taxa5 = 0;
+		my $nb_taxa6 = 0;
+		my $nb_taxa7 = 0;
+		my $nb_taxa8 = 0;
+		my $nb_taxa9 = 0;
+		my $nb_taxa10 = 0;
 		my $nb_other = 0;
         my $nb_hit = 0;
         my $no_hit = 0;
@@ -154,6 +164,21 @@ foreach my $cluster (keys %clusterhash) {
 					}
 					elsif ($whitehash{$contig} =~ /$taxa5/) { 
 							$nb_taxa5++;
+					}
+					elsif ($whitehash{$contig} =~ /$taxa6/) { 
+					    		$nb_taxa6++;
+					}
+					elsif ($whitehash{$contig} =~ /$taxa7/) { 
+					    		$nb_taxa7++;
+					}
+					elsif ($whitehash{$contig} =~ /$taxa8/) { 
+					    		$nb_taxa8++;
+					}
+					elsif ($whitehash{$contig} =~ /$taxa9/) { 
+					    		$nb_taxa9++;
+					}
+					elsif ($whitehash{$contig} =~ /$taxa10/) { 
+					    		$nb_taxa10++;
 					}
 					else { 
 							$nb_other++;
@@ -184,7 +209,7 @@ foreach my $cluster (keys %clusterhash) {
 		my $nb_contig = $#cluster_contigs + 1;
 		
 		
-        print OUTFILE "$cluster\t$nb_contig\t$nb_hit\t$wr\t$nb_taxa1\t$nb_taxa2\t$nb_taxa3\t$nb_taxa4\t$nb_taxa5\t$nb_other\t$no_hit\t$white_score\t$black_score\n";
+        print OUTFILE "$cluster\t$nb_contig\t$nb_hit\t$wr\t$nb_taxa1\t$nb_taxa2\t$nb_taxa3\t$nb_taxa4\t$nb_taxa5\t$nb_taxa6\t$nb_taxa7\t$nb_taxa8\t$nb_taxa9\t$nb_taxa10\t$nb_other\t$no_hit\t$white_score\t$black_score\n";
 }
 close OUTFILE;
 close WHITEID;
