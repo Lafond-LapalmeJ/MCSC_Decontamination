@@ -73,7 +73,7 @@ wget ftp://ftp.ncbi.nlm.nih.gov/pub/taxonomy/taxdump.tar.gz | tar -xvf
 ### Pipeline 
  To run the pipeline simply call:
 ```
- sh MCSC_decontamination.sh file.ini
+ bash MCSC_decontamination.sh file.ini
 ```
 
 ### Output

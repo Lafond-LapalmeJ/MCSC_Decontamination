@@ -94,11 +94,11 @@ then
         else
             LINE1="$(cat "$FASTA" | head -n 1)"
             CHAR1="${LINE1:0:1}"
-            if [ "$CHAR1"0 == "@" ]; then
+            if [ "$CHAR1" == "@" ]; then
                 echo "Converting fastq to fasta..."
                 cat "$FASTA" | awk '{if(NR%4==1) {printf(">%s\n",substr($0,2));} else if(NR%4==2) print;}' \
                     > "${MCSC}"/data/file.fa
-                FASTA="${MCMC}"/data/file.fa
+                FASTA="${MCSC}"/data/file.fa
             else
                 echo "Invalid fastq file."
                 exit 1
