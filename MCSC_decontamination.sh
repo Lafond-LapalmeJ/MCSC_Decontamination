@@ -128,7 +128,7 @@ then
     fi
 
     ## Extract DIAMOND blast taxonomy
-    if[ ! -f $UNIREF100 ]
+    if [ ! -f $UNIREF100 ]
     then
         echo "File $UNIREF100 does not exist. Please check and fix the path in the ini file. Exiting..."
         exit
