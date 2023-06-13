@@ -35,7 +35,7 @@ For more information on the method, see the paper at: https://academic.oup.com/b
 #### Using Conda
 
 ```bash
-conda create -n mcsc-env -f ./conda-env.yml
+conda env create -n mcsc-env -f ./conda-env.yml
 conda activate mcsc-env
 ```
 
@@ -55,7 +55,7 @@ export PATH=$PATH:PATH_TO_DIAMOND/diamondblast
 or Using conda:
 
 ```bash
-conda create -n mcsc-env -f ./conda-env.yml
+conda env create -n mcsc-env -f ./conda-env.yml
 conda activate mcsc-env
 ```
 
