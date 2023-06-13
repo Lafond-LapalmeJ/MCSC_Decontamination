@@ -19,6 +19,8 @@ For more information on the method, see the paper at: https://academic.oup.com/b
  ./data/			       # required data for taxonomy
  
  ./test/			       # example
+
+ ./conda-env.yml    # Conda env yaml file
  
 
 ### Requirements ###
@@ -30,6 +32,12 @@ For more information on the method, see the paper at: https://academic.oup.com/b
  - Uniref90 database build by DIAMOND makedb command (http://www.uniprot.org/downloads)
  - Uniref100 taxlist (https://github.com/GDKO/uniref_taxlist)
 
+#### Using Conda
+
+```bash
+conda create -n mcsc-env -f ./conda-env.yml
+conda activate mcsc-env
+```
 
 ## Installation
 
@@ -44,6 +52,13 @@ tar xzf diamond-linux64.tar.gz
 #add this line to your .bashrc to add DIAMOND in your $PATH
 export PATH=$PATH:PATH_TO_DIAMOND/diamondblast
 ```
+or Using conda:
+
+    ```bash
+    conda create -n mcsc-env -f ./conda-env.yml
+    conda activate mcsc-env
+    ```
+
 3) Get the uniref100 taxlist
 ```
 git clone https://github.com/GDKO/uniref_taxlist.git
