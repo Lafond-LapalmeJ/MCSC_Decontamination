@@ -54,10 +54,10 @@ export PATH=$PATH:PATH_TO_DIAMOND/diamondblast
 ```
 or Using conda:
 
-    ```
-    conda create -n mcsc-env -f ./conda-env.yml
-    conda activate mcsc-env
-    ```
+```bash
+conda create -n mcsc-env -f ./conda-env.yml
+conda activate mcsc-env
+```
 
 3) Get the uniref100 taxlist
 ```
