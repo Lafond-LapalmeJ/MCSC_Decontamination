@@ -54,7 +54,7 @@ export PATH=$PATH:PATH_TO_DIAMOND/diamondblast
 ```
 or Using conda:
 
-    ```bash
+    ```shell
     conda create -n mcsc-env -f ./conda-env.yml
     conda activate mcsc-env
     ```
