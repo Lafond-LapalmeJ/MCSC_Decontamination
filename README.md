@@ -62,7 +62,7 @@ conda activate mcsc-env
 3) Get the uniref100 taxlist
 ```
 git clone https://github.com/GDKO/uniref_taxlist.git
-cat uniref100.taxlist.gz.part-a* | gunzip > uniref100.taxlist
+cat uniref_taxlist/uniref100.taxlist.gz.part-a* | gunzip > uniref100.taxlist
 ```
 4) Get and build uniref90 database with DIAMOND
 ```
